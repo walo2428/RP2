@@ -1,0 +1,28 @@
+services:
+  openldap:
+    image: osixia/openldap:latest
+    container_name: openldap
+    restart: unless-stopped
+    environment:
+      LDAP_ORGANISATION: "IRIS Nice"
+      LDAP_DOMAIN: "iris-nice.lan"
+      LDAP_ADMIN_PASSWORD: "${LDAP_ADMIN_PASSWORD}"
+      LDAP_CONFIG_PASSWORD: "${LDAP_CONFIG_PASSWORD}"
+      LDAP_READONLY_USER: "false"
+      LDAP_TLS: "false"
+    ports:
+      - "389:389"
+    volumes:
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    networks:
+      - ldap-network
+
+networks:
+  ldap-network:
+    name: ldap-network
+    external: false
+
+volumes:
+  ldap-data:
+  ldap-config:

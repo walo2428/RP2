@@ -1,0 +1,50 @@
+groups:
+  - name: iris-nice-alerts
+    rules:
+      - alert: CPUHigh
+        expr: 100 - (avg by(instance) (irate(node_cpu_seconds_total{mode="idle"}[5m])) * 100) > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "CPU eleve sur {{ $labels.instance }}"
+
+      - alert: MemoryHigh
+        expr: (1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 90
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "RAM elevee sur {{ $labels.instance }}"
+
+      - alert: DiskFull
+        expr: (1 - (node_filesystem_avail_bytes / node_filesystem_size_bytes)) * 100 > 85
+        for: 5m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Disque presque plein sur {{ $labels.instance }}"
+
+      - alert: ServiceDown
+        expr: probe_success == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Service indisponible : {{ $labels.instance }}"
+
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Instance indisponible : {{ $labels.instance }}"
+
+      - alert: HighLoad
+        expr: node_load1 > 2
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Charge systeme elevee sur {{ $labels.instance }}"

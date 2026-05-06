@@ -1,0 +1,17 @@
+$TTL 604800
+@   IN  SOA ns.iris-nice.lan. admin.iris-nice.lan. (
+            2026050601
+            3600
+            1800
+            604800
+            604800 )
+
+@           IN  NS  ns.iris-nice.lan.
+ns          IN  A   192.168.50.20
+@           IN  A   192.168.50.20
+cloud       IN  A   192.168.50.20
+grafana     IN  A   192.168.50.20
+prometheus  IN  A   192.168.50.20
+alertmanager IN A   192.168.50.20
+ldap        IN  A   192.168.50.20
+traefik     IN  A   192.168.50.20

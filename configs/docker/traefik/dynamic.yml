@@ -1,0 +1,23 @@
+http:
+  middlewares:
+    security-headers:
+      headers:
+        stsSeconds: 31536000
+        forceSTSHeader: true
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        referrerPolicy: "strict-origin-when-cross-origin"
+    auth:
+      basicAuth:
+        users:
+          - "admin:HASHED_PASSWORD_HERE"
+
+tls:
+  certificates:
+    - certFile: /certs/iris-nice.crt
+      keyFile: /certs/iris-nice.key
+  stores:
+    default:
+      defaultCertificate:
+        certFile: /certs/iris-nice.crt
+        keyFile: /certs/iris-nice.key

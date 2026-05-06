@@ -1,0 +1,37 @@
+auths:
+  public_v2:
+    community: iris-nice
+    version: 2
+
+modules:
+  if_mib:
+    walk:
+      - 1.3.6.1.2.1.2.2.1.2
+      - 1.3.6.1.2.1.2.2.1.8
+      - 1.3.6.1.2.1.2.2.1.10
+      - 1.3.6.1.2.1.2.2.1.16
+    metrics:
+      - name: ifDescr
+        oid: 1.3.6.1.2.1.2.2.1.2
+        type: DisplayString
+        indexes:
+          - labelname: ifIndex
+            type: gauge
+      - name: ifOperStatus
+        oid: 1.3.6.1.2.1.2.2.1.8
+        type: gauge
+        indexes:
+          - labelname: ifIndex
+            type: gauge
+      - name: ifInOctets
+        oid: 1.3.6.1.2.1.2.2.1.10
+        type: counter
+        indexes:
+          - labelname: ifIndex
+            type: gauge
+      - name: ifOutOctets
+        oid: 1.3.6.1.2.1.2.2.1.16
+        type: counter
+        indexes:
+          - labelname: ifIndex
+            type: gauge

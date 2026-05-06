@@ -1,0 +1,127 @@
+services:
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/alerts.yml:/etc/prometheus/alerts.yml
+    networks:
+      - monitoring-network
+      - traefik-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.prometheus.rule=Host(`prometheus.iris-nice.lan`)"
+      - "traefik.http.routers.prometheus.tls=true"
+      - "traefik.http.routers.prometheus.middlewares=security-headers@file"
+      - "traefik.http.services.prometheus.loadbalancer.server.port=9090"
+      - "traefik.docker.network=traefik-network"
+
+  node-exporter:
+    image: prom/node-exporter:latest
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--path.rootfs=/rootfs'
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+
+  alertmanager:
+    image: prom/alertmanager:latest
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./prometheus/alertmanager.yml:/etc/alertmanager/alertmanager.yml
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - monitoring-network
+      - traefik-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.alertmanager.rule=Host(`alertmanager.iris-nice.lan`)"
+      - "traefik.http.routers.alertmanager.tls=true"
+      - "traefik.http.routers.alertmanager.middlewares=security-headers@file"
+      - "traefik.http.services.alertmanager.loadbalancer.server.port=9093"
+      - "traefik.docker.network=traefik-network"
+
+  blackbox-exporter:
+    image: prom/blackbox-exporter:latest
+    volumes:
+      - ./prometheus/blackbox.yml:/etc/blackbox_exporter/config.yml
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+
+  snmp-exporter:
+    image: prom/snmp-exporter:latest
+    volumes:
+      - ./prometheus/snmp.yml:/etc/snmp_exporter/snmp.yml
+    ports:
+      - "9116:9116"
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - ./loki/loki-config.yml:/etc/loki/local-config.yaml
+      - loki-data:/loki
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./promtail/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    networks:
+      - monitoring-network
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    env_file: .env
+    environment:
+      GF_AUTH_LDAP_ENABLED: 'true'
+      GF_AUTH_LDAP_CONFIG_FILE: /etc/grafana/ldap.toml
+      GF_SERVER_ROOT_URL: https://grafana.iris-nice.lan
+      GF_SECURITY_ADMIN_PASSWORD: ${GF_SECURITY_ADMIN_PASSWORD}
+    volumes:
+      - ./grafana/ldap.toml:/etc/grafana/ldap.toml
+      - grafana-data:/var/lib/grafana
+    networks:
+      - monitoring-network
+      - traefik-network
+      - ldap-network
+    restart: unless-stopped
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.grafana.rule=Host(`grafana.iris-nice.lan`)"
+      - "traefik.http.routers.grafana.tls=true"
+      - "traefik.http.routers.grafana.middlewares=security-headers@file"
+      - "traefik.docker.network=traefik-network"
+
+networks:
+  monitoring-network:
+  traefik-network:
+    external: true
+  ldap-network:
+    name: ldap-network
+    external: true
+
+volumes:
+  loki-data:
+  grafana-data:

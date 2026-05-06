@@ -1,0 +1,9 @@
+.env
+*.key
+*.crt
+volumes/
+/var/log/
+*.leases
+*.log
+__pycache__/
+.DS_Store
